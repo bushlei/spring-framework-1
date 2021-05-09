@@ -13,6 +13,6 @@ public class JavaConfig {
 
 	@Bean
 	public User user(){
-		return new User(101,"ganquanzhong","pwd","13995978321","china");
+		return new User(101,"caocr","pwd","123456","china");
 	}
 }
