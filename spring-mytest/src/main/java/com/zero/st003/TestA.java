@@ -36,16 +36,20 @@ public class TestA implements ApplicationContextAware, EnvironmentAware {
 
     public void init() {
         System.out.println("执行bean的初始化方法：init");
-        System.out.println(this.getName());
+//        System.out.println(this.getName());
     }
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        System.out.println(this.getName());
+        System.out.println(applicationContext);
         this.applicationContext = applicationContext;
     }
 
     @Override
     public void setEnvironment(Environment environment) {
+        System.out.println(this.getName());
+        System.out.println(environment);
         this.environment = environment;
     }
 }

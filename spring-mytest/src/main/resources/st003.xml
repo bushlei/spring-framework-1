@@ -7,4 +7,5 @@
 		<property name="name" value="zhang san"/>
 	</bean>
 	<bean class="com.zero.st003.TestBeanFactoryPostProcessor"/>
+	<bean class="com.zero.st003.TestBeanPostProcessor"/>
 </beans>
