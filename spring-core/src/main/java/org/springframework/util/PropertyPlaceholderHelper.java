@@ -126,7 +126,11 @@ public class PropertyPlaceholderHelper {
 
 	protected String parseStringValue(
 			String value, PlaceholderResolver placeholderResolver, @Nullable Set<String> visitedPlaceholders) {
-
+		/**
+		 * 以st004-${usernam:zero}.xml举例：
+		 * 1.优先取usernam:zero对应的值
+		 *
+		 */
 		int startIndex = value.indexOf(this.placeholderPrefix);
 		if (startIndex == -1) {
 			return value;
