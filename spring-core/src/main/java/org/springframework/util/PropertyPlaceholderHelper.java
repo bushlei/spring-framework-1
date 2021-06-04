@@ -128,8 +128,9 @@ public class PropertyPlaceholderHelper {
 			String value, PlaceholderResolver placeholderResolver, @Nullable Set<String> visitedPlaceholders) {
 		/**
 		 * 以st004-${usernam:zero}.xml举例：
-		 * 1.优先取usernam:zero对应的值
-		 *
+		 * 1.优先取usernam:zero对应的值，取不到则转第2步
+		 * 2.将:两边拆开，右边是默认值，对左边再取值
+		 * 3.取不到，则取默认值zero
 		 */
 		int startIndex = value.indexOf(this.placeholderPrefix);
 		if (startIndex == -1) {
@@ -138,8 +139,11 @@ public class PropertyPlaceholderHelper {
 
 		StringBuilder result = new StringBuilder(value);
 		while (startIndex != -1) {
+			// 找到与${配对的}的位置
 			int endIndex = findPlaceholderEndIndex(result, startIndex);
 			if (endIndex != -1) {
+				// 找到了
+				// 截取${}之间的字符串
 				String placeholder = result.substring(startIndex + this.placeholderPrefix.length(), endIndex);
 				String originalPlaceholder = placeholder;
 				if (visitedPlaceholders == null) {
@@ -150,16 +154,22 @@ public class PropertyPlaceholderHelper {
 							"Circular placeholder reference '" + originalPlaceholder + "' in property definitions");
 				}
 				// Recursive invocation, parsing placeholders contained in the placeholder key.
+				// 再对截取出来的字符串进行递归调用，再解析出子字符串，比如${${}}
 				placeholder = parseStringValue(placeholder, placeholderResolver, visitedPlaceholders);
 				// Now obtain the value for the fully resolved key...
+				// 进行值替换
 				String propVal = placeholderResolver.resolvePlaceholder(placeholder);
 				if (propVal == null && this.valueSeparator != null) {
+					// 没有找到，就对placeholder进行:的拆分
 					int separatorIndex = placeholder.indexOf(this.valueSeparator);
 					if (separatorIndex != -1) {
 						String actualPlaceholder = placeholder.substring(0, separatorIndex);
+						// :右边的是默认值
 						String defaultValue = placeholder.substring(separatorIndex + this.valueSeparator.length());
+						// :左边进行值替换
 						propVal = placeholderResolver.resolvePlaceholder(actualPlaceholder);
 						if (propVal == null) {
+							// 没找到就取默认值
 							propVal = defaultValue;
 						}
 					}
@@ -167,44 +177,68 @@ public class PropertyPlaceholderHelper {
 				if (propVal != null) {
 					// Recursive invocation, parsing placeholders contained in the
 					// previously resolved placeholder value.
+					// 替换的值仍可能是place holder，再进行递归调用，进行解析
 					propVal = parseStringValue(propVal, placeholderResolver, visitedPlaceholders);
+					// 进行替换
 					result.replace(startIndex, endIndex + this.placeholderSuffix.length(), propVal);
 					if (logger.isTraceEnabled()) {
 						logger.trace("Resolved placeholder '" + placeholder + "'");
 					}
+					// 解析下一个${}，比如${}${}，第二个
 					startIndex = result.indexOf(this.placeholderPrefix, startIndex + propVal.length());
 				}
 				else if (this.ignoreUnresolvablePlaceholders) {
 					// Proceed with unprocessed value.
+					// 忽略找不到替换值的错误
 					startIndex = result.indexOf(this.placeholderPrefix, endIndex + this.placeholderSuffix.length());
 				}
 				else {
+					// 没找到替换值，抛异常
 					throw new IllegalArgumentException("Could not resolve placeholder '" +
 							placeholder + "'" + " in value \"" + value + "\"");
 				}
 				visitedPlaceholders.remove(originalPlaceholder);
 			}
 			else {
+				// 没有配对的}，跳出while循环，直接返回
 				startIndex = -1;
 			}
 		}
 		return result.toString();
 	}
 
+	public static void main(String[] args) {
+		PropertyPlaceholderHelper helper = new PropertyPlaceholderHelper("${", "}", ":", false);
+		String value = "${a-${b-${c}}d-${e}}";
+		int startIndex = value.indexOf("${");
+
+		StringBuilder result = new StringBuilder(value);
+		helper.findPlaceholderEndIndex(result, startIndex);
+	}
+
+	/**
+	 *  for example {@link PropertyPlaceholderHelper#main}
+	 * @param buf CharSequence
+	 * @param startIndex int
+	 * @return index of } with ${
+	 */
 	private int findPlaceholderEndIndex(CharSequence buf, int startIndex) {
 		int index = startIndex + this.placeholderPrefix.length();
 		int withinNestedPlaceholder = 0;
 		while (index < buf.length()) {
 			if (StringUtils.substringMatch(buf, index, this.placeholderSuffix)) {
 				if (withinNestedPlaceholder > 0) {
+					// 找到一个}就减1
 					withinNestedPlaceholder--;
 					index = index + this.placeholderSuffix.length();
 				}
 				else {
+					// withinNestedPlaceholder == 0，就找到了${配对的}的位置
 					return index;
 				}
 			}
 			else if (StringUtils.substringMatch(buf, index, this.simplePrefix)) {
+				// 从第2个{开始，找到一个{就加1，表示里面里面嵌套${}的个数
 				withinNestedPlaceholder++;
 				index = index + this.simplePrefix.length();
 			}
@@ -212,6 +246,7 @@ public class PropertyPlaceholderHelper {
 				index++;
 			}
 		}
+		// 没找到配对的}就返回-1
 		return -1;
 	}
 
