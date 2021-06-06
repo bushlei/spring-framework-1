@@ -127,7 +127,7 @@ public class PropertyPlaceholderHelper {
 	protected String parseStringValue(
 			String value, PlaceholderResolver placeholderResolver, @Nullable Set<String> visitedPlaceholders) {
 		/**
-		 * 以st004-${usernam:zero}.xml举例：
+		 * 以st004-${usernam:zero}.xml举例：（${、}、:只是默认的，也可以自己定义）
 		 * 1.优先取usernam:zero对应的值，取不到则转第2步
 		 * 2.将:两边拆开，右边是默认值，对左边再取值
 		 * 3.取不到，则取默认值zero
@@ -150,6 +150,7 @@ public class PropertyPlaceholderHelper {
 					visitedPlaceholders = new HashSet<>(4);
 				}
 				if (!visitedPlaceholders.add(originalPlaceholder)) {
+					// todo caocr 什么情况下回出现这个异常？
 					throw new IllegalArgumentException(
 							"Circular placeholder reference '" + originalPlaceholder + "' in property definitions");
 				}
