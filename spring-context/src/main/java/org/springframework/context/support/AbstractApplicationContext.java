@@ -622,8 +622,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	protected void prepareRefresh() {
 		// Switch to active.
+		// 记录容器启动的开始时间
 		this.startupDate = System.currentTimeMillis();
+		// 设置容器关闭标志位为false
 		this.closed.set(false);
+		// 设置容器激活标志位为true
 		this.active.set(true);
 
 		if (logger.isDebugEnabled()) {
