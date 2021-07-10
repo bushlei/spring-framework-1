@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+    <bean id="abstractBean" abstract="true">
+        <property name="name" value="zero"/>
+        <property name="age" value="40"/>
+        <property name="gender" value="male"/>
+    </bean>
+    <bean id="childrenBeanA" class="com.zero.st006.ChildrenBean" parent="abstractBean">
+        <property name="name" value="bush"/>
+        <property name="age" value="45"/>
+        <property name="height" value="180"/>
+    </bean>
+    <bean id="childrenBeanB" class="com.zero.st006.ChildrenBean" parent="abstractBean">
+        <property name="name" value="john"/>
+        <property name="age" value="50"/>
+        <property name="height" value="190"/>
+    </bean>
+</beans>
