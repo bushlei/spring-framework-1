@@ -15,5 +15,6 @@ public class St006Main {
         System.out.println(childrenBeanA);
         ChildrenBean childrenBeanB = applicationContext.getBean("childrenBeanB", ChildrenBean.class);
         System.out.println(childrenBeanB);
+		int  a = 1/0;
     }
 }
